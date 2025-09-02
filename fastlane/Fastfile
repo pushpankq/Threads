@@ -1,0 +1,77 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+
+  desc "Load the App Store Connect API token"
+  lane :load_asc_api_token do
+    app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_content: ENV["ASC_KEY_P8"],
+      is_key_content_base64: true,
+      in_house: false
+    )
+  end
+
+  desc "Increment build, set version, manage certs, build and upload to TestFlight"
+  lane :beta do |options|
+
+    # 🔐 Load App Store Connect API token
+    load_asc_api_token
+
+    # ✅ Set app version if provided
+    if options[:version]
+      version = options[:version]
+      UI.message("📌 Setting app version to #{version}")
+      increment_version_number(version_number: version)
+    else
+      UI.message("✅ Skipping version bump. No version provided.")
+    end
+
+    # 🔢 Increment build number using timestamp
+    build_number = Time.now.strftime("%Y%m%d%H%M")
+    increment_build_number(build_number: build_number)
+    UI.message("🚀 Incremented build number to #{build_number}")
+
+    # 🔐 Automatically manage certificates & profiles using match
+    match(
+      type: "appstore",               # or "adhoc" if distributing ad hoc
+      readonly: false,
+      app_identifier: "com.yourcompany.yourapp",  # ⬅️ UPDATE this
+      username: "yourappleid@example.com"         # ⬅️ UPDATE this
+    )
+
+    # 🛠 Build the iOS app
+    build_app(
+      scheme: "YourAppScheme",       # ⬅️ UPDATE with your scheme
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "YourApp.ipa"
+    )
+
+    # 🚀 Upload to TestFlight using App Store Connect API token
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      changelog: options[:changelog] || "Automatic build uploaded by Fastlane."
+    )
+
+    UI.success("🎉 Build #{build_number} uploaded to TestFlight!")
+  end
+
+end
+
