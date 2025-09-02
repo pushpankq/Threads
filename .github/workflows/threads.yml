@@ -9,7 +9,7 @@ on:
       - '**'
 
 jobs:
-  # 🚀 Build & Deploy to TestFlight
+  # 🚀 Build & Deploy to TestFlight on push to apple-release
   build-and-deploy-ios:
     if: github.ref == 'refs/heads/apple-release'
     runs-on: macos-latest
@@ -54,7 +54,7 @@ jobs:
       - name: 🧪 Run Tests
         run: |
           xcodebuild clean test \
-            -project Threads.xcodeproj \       # <-- Update if using .xcworkspace
-            -scheme Threads \                  # <-- Your scheme
+            -project Threads.xcodeproj \
+            -scheme Threads \
             -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' \
             CODE_SIGNING_ALLOWED=NO
