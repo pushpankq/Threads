@@ -56,5 +56,4 @@ jobs:
           xcodebuild clean test \
             -project Threads.xcodeproj \
             -scheme Threads \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.4' \
-            CODE_SIGNING_ALLOWED=NO
+            -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation),OS=18.6'
