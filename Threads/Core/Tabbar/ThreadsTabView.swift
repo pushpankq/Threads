@@ -56,7 +56,6 @@ struct ThreadsTabView: View {
 
                 }
                 .onAppear {
-                    print("selectedTab: ", selectedTab)
                     selectedTab = 4
                 }
                 .tag(4)
