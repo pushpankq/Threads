@@ -1,22 +1,18 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-# For a list of all available plugins, check out
-#
-#     https://docs.fastlane.tools/plugins/available-plugins
-#
-
-# Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
-
 default_platform(:ios)
 
 platform :ios do
 
+  #
+  # 🔧 Runs before any lane
+  #
+  before_all do
+    setup_ci                      # Setup Fastlane environment for CI (GitHub Actions, etc.)
+    load_asc_api_token           # Load App Store Connect API token (env vars must be set)
+  end
+
+  #
+  # 🔐 Load App Store Connect API token
+  #
   desc "Load the App Store Connect API token"
   lane :load_asc_api_token do
     app_store_connect_api_key(
@@ -28,11 +24,11 @@ platform :ios do
     )
   end
 
+  #
+  # 🚀 Beta Release Lane
+  #
   desc "Increment build, set version, manage certs, build and upload to TestFlight"
   lane :beta do |options|
-
-    # 🔐 Load App Store Connect API token
-    load_asc_api_token
 
     # ✅ Set app version if provided
     if options[:version]
@@ -74,4 +70,3 @@ platform :ios do
   end
 
 end
-
