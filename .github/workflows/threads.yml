@@ -1,17 +1,18 @@
-# This workflow will build a Swift project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
-
 name: Threads
 
 on:
   push:
     branches:
       - apple-release
+  pull_request:
+    branches:
+      - '**'
 
 jobs:
+  # 🚀 Build & Deploy to TestFlight
   build-and-deploy-ios:
+    if: github.ref == 'refs/heads/apple-release'
     runs-on: macos-latest
-
     steps:
       - name: ⬇️ Checkout code
         uses: actions/checkout@v4
@@ -39,3 +40,21 @@ jobs:
         run: |
           bundle exec fastlane beta
 
+  # 🧪 Run Unit Tests on Pull Request
+  run-tests:
+    if: github.event_name == 'pull_request'
+    runs-on: macos-latest
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🛠 Set up Xcode (use default)
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: 🧪 Run Tests
+        run: |
+          xcodebuild clean test \
+            -project Threads.xcodeproj \       # <-- Update if using .xcworkspace
+            -scheme Threads \                  # <-- Your scheme
+            -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' \
+            CODE_SIGNING_ALLOWED=NO
